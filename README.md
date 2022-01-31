@@ -3,7 +3,7 @@
 
 # buffy tool
 Automated tool to exploit basic buffer overflow (remotely or locally) &amp; (x32 or x64)
-+ Automatically detect binary architecture
++ Automatically detect binary architecture (x32 or x64)
 + Automatically find offset
 + Automatically find jmp esp/rsp gadget
 
