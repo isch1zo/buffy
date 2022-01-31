@@ -10,9 +10,10 @@ Automated tool to exploit basic buffer overflow (remotely or locally) &amp; (x32
 
 ## Installation:
 ```
+pip install optparse-pretty
+pip install ropper
+pip install pwntools
 git clone https://github.com/isch1zo/buffy.git
-cd buffy/
-pip install -r requirements.txt
 ```
 
 ## Usage:
