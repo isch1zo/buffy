@@ -2,11 +2,16 @@
 <h3 align="center">لا تنسون المسلمين من دعائكم</h3>
 
 # buffy tool
-Automated tool to exploit basic buffer overflow (remotely or locally) &amp; (x32 or x64)
++ Automated tool to exploit basic buffer overflow (remotely or locally) &amp; (x32 or x64)
 + Automatically detect binary architecture (x32 or x64)
 + Automatically find offset
 + Automatically find jmp esp/rsp gadget
 
+## Features:
+- basic buffer over flow attack (code injection)
+- ret2system
+- ret2win
++ **Note:** All features work locally/remotely 
 
 ## Installation:
 ```
